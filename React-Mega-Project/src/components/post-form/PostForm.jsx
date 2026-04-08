@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export default function PostForm({ post }) {
+
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
             Title: post?.Title || "",
@@ -20,7 +21,9 @@ export default function PostForm({ post }) {
 
     const submit = async (data) => {
         if (post) {
-            const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
+            const file = data.image[0]
+                ? await appwriteService.uploadFile(data.image[0])
+                : null;
 
             if (file) {
                 appwriteService.deleteFile(post.FeaturedImage);
@@ -30,12 +33,10 @@ export default function PostForm({ post }) {
                 Title: data.Title,
                 Content: data.Content,
                 FeaturedImage: file ? file.$id : post.FeaturedImage,
-                Status: data.Status
+                Status: data.Status,
             });
 
-            if (dbPost) {
-                navigate(`/post/${dbPost.$id}`);
-            }
+            if (dbPost) navigate(`/post/${dbPost.$id}`);
         } else {
             const file = await appwriteService.uploadFile(data.image[0]);
 
@@ -46,12 +47,10 @@ export default function PostForm({ post }) {
                     Content: data.Content,
                     FeaturedImage: file.$id,
                     Status: data.Status,
-                    UserId: userData.$id
+                    UserId: userData.$id,
                 });
 
-                if (dbPost) {
-                    navigate(`/post/${dbPost.$id}`);
-                }
+                if (dbPost) navigate(`/post/${dbPost.$id}`);
             }
         }
     };
@@ -78,52 +77,87 @@ export default function PostForm({ post }) {
     }, [watch, slugTransform, setValue]);
 
     return (
-        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
-            <div className="w-2/3 px-2">
-                <Input
-                    label="Title :"
-                    placeholder="Title"
-                    className="mb-4"
-                    {...register("Title", { required: true })}
-                />
-                <Input
-                    label="Slug :"
-                    placeholder="Slug"
-                    className="mb-4"
-                    {...register("slug", { required: true })}
-                    onInput={(e) => {
-                        setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
-                    }}
-                />
-                <RTE label="Content :" name="Content" control={control} defaultValue={getValues("Content")} />
-            </div>
-            <div className="w-1/3 px-2">
-                <Input
-                    label="Featured Image :"
-                    type="file"
-                    className="mb-4"
-                    accept="image/png, image/jpg, image/jpeg, image/gif"
-                    {...register("image", { required: !post })}
-                />
-                {post && (
-                    <div className="w-full mb-4">
-                        <img
-                            src={appwriteService.getFilePreview(post.FeaturedImage)}
-                            alt={post.Title}
-                            className="rounded-lg"
+        <form onSubmit={handleSubmit(submit)}>
+
+            {/* 🔥 Main Card */}
+            <div className="bg-gray-300 rounded-2xl shadow-md p-6 md:p-8">
+
+                <div className="flex flex-col md:flex-row gap-6">
+
+                    {/* LEFT SIDE */}
+                    <div className="w-full md:w-2/3 space-y-5">
+
+                        <Input
+                            label="Title"
+                            placeholder="Enter post title"
+                            {...register("Title", { required: true })}
                         />
+
+                        <Input
+                            label="Slug"
+                            placeholder="Auto-generated slug"
+                            {...register("slug", { required: true })}
+                            onInput={(e) => {
+                                setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
+                            }}
+                        />
+
+                        <div>
+                            <p className="mb-2 text-sm font-medium text-gray-700">
+                                Content
+                            </p>
+                            <RTE
+                                name="Content"
+                                control={control}
+                                defaultValue={getValues("Content")}
+                            />
+                        </div>
+
                     </div>
-                )}
-                <Select
-                    options={["active", "inactive"]}
-                    label="Status"
-                    className="mb-4"
-                    {...register("Status", { required: true })}
-                />
-                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full">
-                    {post ? "Update" : "Submit"}
-                </Button>
+
+                    {/* RIGHT SIDE */}
+                    <div className="w-full md:w-1/3 space-y-5">
+
+                        <Input
+                            label="Featured Image"
+                            type="file"
+                            accept="image/png, image/jpg, image/jpeg, image/gif"
+                            {...register("image", { required: !post })}
+                        />
+
+                        {post && (
+                            <div className="w-full">
+                                <p className="text-sm mb-2 text-gray-700">Current Image</p>
+                                <img
+                                    src={appwriteService.getFilePreview(post.FeaturedImage)}
+                                    alt={post.Title}
+                                    className="rounded-lg w-full h-40 object-cover"
+                                />
+                            </div>
+                        )}
+
+                        <Select
+                            options={["active", "inactive"]}
+                            label="Status"
+                            {...register("Status", { required: true })}
+                        />
+
+                        <Button
+                            type="submit"
+                            className={`w-full text-white rounded-full py-2 transition ${
+                                post
+                                    ? "bg-green-600 hover:bg-green-700"
+                                    : "bg-gray-600 hover:bg-gray-700"
+                            }`}
+                        >
+                            {post ? "Update Post" : "Create Post"}
+                        </Button>
+
+                    </div>
+
+                </div>
             </div>
+
         </form>
     );
 }

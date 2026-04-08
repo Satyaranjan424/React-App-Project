@@ -27,7 +27,7 @@ function App() {
       <div className='w-full block'>
         <Header />
         <main>
-        TODO:  <Outlet />
+          <Outlet />
         </main>
         <Footer />
       </div>
@@ -36,17 +36,3 @@ function App() {
 }
 
 export default App
-
-
-
-// function App() {
-//   console.log(import.meta.env.VITE_APPWRITE_URL);
-
-//   return (
-//     <>
-//       <h1> This is a react app mega project</h1>
-//     </>
-//   )
-// }
-
-// export default App
